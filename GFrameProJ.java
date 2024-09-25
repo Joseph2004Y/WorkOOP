@@ -125,7 +125,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
 
 }
 
-// คลาสสำหรับรันเธรด (ยังไม่ได้ใช้งาน)FUCK
+// คลาสสำหรับรันเธรด (ยังไม่ได้ใช้งาน)
 class TheThreadRun extends Thread{
 
 
