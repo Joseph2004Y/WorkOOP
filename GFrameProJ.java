@@ -45,9 +45,8 @@ class PanelProJ extends JPanel implements MouseMotionListener{
     int yFrame=0;
 
 
-
     Image backgrou =  Toolkit.getDefaultToolkit().createImage(
-        System.getProperty("user.dir") + File.separator + "imgProject\\world.jpg"
+        System.getProperty("user.dir") + File.separator + "imgProject " + File.separator + "world.jpg"
     );
 
 
@@ -75,7 +74,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
                 int randInt =  (int)(Math.random()*10)+1;
                 String randOf = String.valueOf(randInt); 
                 Img[i] =   Toolkit.getDefaultToolkit().createImage(
-                    System.getProperty("user.dir") + File.separator + "imgProject\\" + randOf +".png"
+                    System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + randOf +".png"
                 );
 
             }
