@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
+import java.util.Random;
 import java.util.Scanner;
 import javax.swing.*;
 //test git hub
@@ -46,7 +47,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
 
 
     Image backgrou =  Toolkit.getDefaultToolkit().createImage(
-        System.getProperty("user.dir") + File.separator + "imgProject " + File.separator + "world.jpg"
+        System.getProperty("user.dir") + File.separator + "imgProject\\world.jpg"
     );
 
 
@@ -67,15 +68,18 @@ class PanelProJ extends JPanel implements MouseMotionListener{
             //จัดการข้อมูล และสุ่มตำแหน่งอุกาบาต
             for(int i=0;i<Object;i++){
 
-                xObject[i] = (int)(Math.random()*900);//สุ่มตำแหน่ง x
-                yObject[i] = (int)(Math.random()*500);//สุ่มตำแหน่ง y
-                ShowObject[i] = true;
-
                 int randInt =  (int)(Math.random()*10)+1;
                 String randOf = String.valueOf(randInt); 
                 Img[i] =   Toolkit.getDefaultToolkit().createImage(
                     System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + randOf +".png"
                 );
+
+
+                xObject[i] = (int)(Math.random()*900);//สุ่มตำแหน่ง x
+                yObject[i] = (int)(Math.random()*500);//สุ่มตำแหน่ง y
+                ShowObject[i] = true;
+                Run[i] = new TheThreadRun(xObject, yObject, i);
+                Run[i].start();
 
             }
         }
@@ -95,7 +99,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
             if(ShowObject[i])
             {
 
-            g.drawImage(Img[i], xObject[i], yObject[i], 50,50,this);
+            g.drawImage(Img[i], xObject[i], yObject[i], 100,100,this);
 
             }
             
@@ -123,18 +127,66 @@ class PanelProJ extends JPanel implements MouseMotionListener{
 
 }
 
-// คลาสสำหรับรันเธรด (ยังไม่ได้ใช้งาน)
 class TheThreadRun extends Thread{
 
+    int[] xObject;
+    int[] yObject;
+    int i;
+    int xMove = 5;
+    int yMove = 5;  
 
-    TheThreadRun(){
+    TheThreadRun(int[] xObject, int[] yObject, int i){
 
-
+        this.xObject = xObject;
+        this.yObject = yObject;
+        this.i = i;
 
 
     }
 
+    @Override
+    public void run() {
 
+        Random random = new Random();
+        int sleep = random.nextInt(500);//สุ่ม เวลาการขยับช้าหรือเร็ว
+
+        while (true) {
+            
+            try {
+            
+                Thread.sleep(sleep);
+                
+                
+
+                if (xObject[i] >= 900-50||yObject[i] >= 500-50) {
+                    
+                    sleep = random.nextInt(500);
+                    xMove = random.nextInt(10);
+                    yMove = random.nextInt(10);
+                    xMove *= -1;
+                    yMove *= -1;
+                
+                }
+
+                if (xObject[i] <= 0||yObject[i] <= 0) {
+                    
+                    sleep = random.nextInt(500);
+                    xMove = random.nextInt(10);
+                    yMove = random.nextInt(10);
+                    xMove *= 1;
+                    yMove *= 1;
+                }
+                xObject[i] += xMove;
+                yObject[i] += yMove;
+
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            
+
+
+        }
+    }
 
 }
 
