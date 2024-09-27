@@ -40,14 +40,14 @@ class PanelProJ extends JPanel implements MouseMotionListener{
     //แสดงอุกาบาตนั้นๆ หากเป็น true
     boolean []ShowObject ; 
     //เก็บอุกาบาตที่สสุ่มได้
-    JLabel[] label;
-    Image []Img;
+    Image[] Img;
     TheThreadRun []Run;
     //ยิง
     boolean Shot = false;
 
     int xFrame=0;
     int yFrame=0;
+    
 
 
     Image backgrou =  Toolkit.getDefaultToolkit().createImage(
@@ -67,7 +67,6 @@ class PanelProJ extends JPanel implements MouseMotionListener{
             xObject = new int[Object];
             yObject = new int[Object];
             ShowObject = new boolean[Object];
-            label = new JLabel[Object];
             Img = new Image[Object];
             Run = new TheThreadRun[Object];
 
@@ -80,14 +79,31 @@ class PanelProJ extends JPanel implements MouseMotionListener{
                     System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + randOf +".png"
                 );
 
+                boolean positionFound = false;
 
-                xObject[i] = (int)(Math.random()*900);//สุ่มตำแหน่ง x
-                yObject[i] = (int)(Math.random()*500);//สุ่มตำแหน่ง y
-                ShowObject[i] = true;
-                Run[i] = new TheThreadRun(xObject, yObject, i, label[i]);
-                Run[i].start();
+            while (!positionFound) {
+            // สุ่มตำแหน่ง x และ y
+            xObject[i] = (int)(Math.random() * 900); // สุ่มตำแหน่ง x
+            yObject[i] = (int)(Math.random() * 500); // สุ่มตำแหน่ง y
 
+            positionFound = true; // เริ่มต้นว่าพบตำแหน่งแล้ว
+            
+            for (int j = 0; j < i; j++) {// ตรวจสอบตำแหน่งที่สุ่มได้กับตำแหน่งที่สุ่มไปก่อนหน้านี้
+                // ถ้าตำแหน่งซ้ำ
+                if (xObject[i] < xObject[j] + 100 && xObject[i] + 100 > xObject[j] &&
+                    yObject[i] < yObject[j] + 100 && yObject[i] + 100 > yObject[j]) {
+                    positionFound = false; // ไม่พบตำแหน่งที่ไม่ซ้ำ
+                    break; 
+                }
             }
+        }
+
+    ShowObject[i] = true;
+    Run[i] = new TheThreadRun(xObject, yObject, i);
+    Run[i].start();
+            }
+        }catch (Exception e) {
+            System.out.println("กรุณาใส่ข้อมูลเป็นตัวเลขเพื่อกำหนดจำนวน!!!!!!");
         }
         
     }
@@ -99,15 +115,31 @@ class PanelProJ extends JPanel implements MouseMotionListener{
         //ภาพพื้นหลัง
         g.drawImage(backgrou, 0, 0, getWidth(), getHeight(),this);
         
-        //แสดงอุกาบาต  
-        for(int i=0;i<ShowObject.length;i++){
 
-            g.drawImage(Img[i], xObject[i], yObject[i], 100,100,this);
+    // แสดงอุกาบาต   
+    for (int i = 0; i < ShowObject.length; i++) {
 
+    g.drawImage(Img[i], xObject[i], yObject[i], 100, 100, this); // วาดภาพอุกาบาต
+
+    for (int j = 0; j < xObject.length; j++) {
+        if (i != j) {
+            // ตรวจสอบการชนกันระหว่างวัตถุ i และ j
+            if (checkCollision(xObject[i], yObject[i], xObject[j], yObject[j])) {
+                Run[i].reverseDirection();
+                Run[j].reverseDirectionZERO();
+                }
+            }
         }
+    }
         repaint();
 
     }
+
+    public boolean checkCollision(int x1, int y1, int x2, int y2) {
+        int size = 100;
+        return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
+    }
+    
 //======================================================================================
 
     @Override
@@ -134,17 +166,17 @@ class TheThreadRun extends Thread{
 
     int[] xObject;
     int[] yObject;
-    JLabel label;
     int i;
     int xMove = 5;
     int yMove = 5;  
+    int sleep = 0;
 
-    TheThreadRun(int[] xObject, int[] yObject, int i,JLabel label){
+    TheThreadRun(int[] xObject, int[] yObject, int i){
 
         this.xObject = xObject;
         this.yObject = yObject;
         this.i = i;
-        this.label = label;
+
 
     }
 
@@ -152,28 +184,27 @@ class TheThreadRun extends Thread{
     public void run() {
 
         Random random = new Random();
-        int sleep = random.nextInt(500);
+        sleep = random.nextInt(1000);
 
         while (true) {
             
             try {
             
                 Thread.sleep(sleep);
-                
-                
 
                 if (xObject[i] >= 900-50||yObject[i] >= 500-50) {
                     
-                    sleep = random.nextInt(500);
+                    sleep = random.nextInt(1000);
                     reverseDirection();
                 
                 }
 
                 if (xObject[i] <= 0||yObject[i] <= 0) {
                     
-                    sleep = random.nextInt(500);
+                    sleep = random.nextInt(1000);
                     reverseDirectionZERO();
                 }
+                
                 
                 xObject[i] += xMove;
                 yObject[i] += yMove;
@@ -189,6 +220,7 @@ class TheThreadRun extends Thread{
     //เมื่อตำแหน่ง X Y มากกว่า Frame การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น ลบ
     public void reverseDirection() {
         Random random = new Random();
+        sleep = random.nextInt(1000);
         xMove = random.nextInt(10);
         yMove = random.nextInt(10);
         xMove *= -1;
@@ -198,6 +230,7 @@ class TheThreadRun extends Thread{
     //เมื่อตำแหน่ง X Y เท่ากับ 0 การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น บวก
     public void reverseDirectionZERO(){
         Random random = new Random();
+        sleep = random.nextInt(1000);
         xMove = random.nextInt(10);
         yMove = random.nextInt(10);
         xMove *= 1;
