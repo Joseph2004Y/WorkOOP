@@ -33,14 +33,18 @@ public static void main(String[] args) {
 
 class PanelProJ extends JPanel implements MouseMotionListener{
 
+
     //ข้อมูลตำแหน่งของอุกาบาต
     int []xObject ;
     int []yObject ;
     //แสดงอุกาบาตนั้นๆ หากเป็น true
     boolean []ShowObject ; 
     //เก็บอุกาบาตที่สสุ่มได้
+    JLabel[] label;
     Image []Img;
     TheThreadRun []Run;
+    //ยิง
+    boolean Shot = false;
 
     int xFrame=0;
     int yFrame=0;
@@ -54,14 +58,16 @@ class PanelProJ extends JPanel implements MouseMotionListener{
     public PanelProJ(){
 
         setSize(950, 600);
+        setLayout(null);
 
         //กำหนดจำนวนอุกาบาต
         try (Scanner input = new Scanner(System.in)) {
-            System.out.print("Enter :");int Object = input.nextInt();
+            System.out.print("Enter number of objects :");int Object = input.nextInt();
 
             xObject = new int[Object];
             yObject = new int[Object];
             ShowObject = new boolean[Object];
+            label = new JLabel[Object];
             Img = new Image[Object];
             Run = new TheThreadRun[Object];
 
@@ -78,7 +84,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
                 xObject[i] = (int)(Math.random()*900);//สุ่มตำแหน่ง x
                 yObject[i] = (int)(Math.random()*500);//สุ่มตำแหน่ง y
                 ShowObject[i] = true;
-                Run[i] = new TheThreadRun(xObject, yObject, i);
+                Run[i] = new TheThreadRun(xObject, yObject, i, label,Img);
                 Run[i].start();
 
             }
@@ -93,16 +99,10 @@ class PanelProJ extends JPanel implements MouseMotionListener{
         //ภาพพื้นหลัง
         g.drawImage(backgrou, 0, 0, getWidth(), getHeight(),this);
         
-        //แสดงอุกาบาต 
+        //แสดงอุกาบาต  
         for(int i=0;i<ShowObject.length;i++){
 
-            if(ShowObject[i])
-            {
-
             g.drawImage(Img[i], xObject[i], yObject[i], 100,100,this);
-
-            }
-            
 
         }
         repaint();
@@ -118,6 +118,9 @@ class PanelProJ extends JPanel implements MouseMotionListener{
 
     @Override
     public void mouseMoved(MouseEvent e) {
+       
+        Shot = false; //ยับเมารืจะไม่เกิดการยิง
+
         xFrame = e.getX();
         yFrame = e.getY();
 
@@ -131,16 +134,20 @@ class TheThreadRun extends Thread{
 
     int[] xObject;
     int[] yObject;
+    JLabel[] label;
+    Image[] Img;
     int i;
     int xMove = 5;
     int yMove = 5;  
 
-    TheThreadRun(int[] xObject, int[] yObject, int i){
+    TheThreadRun(int[] xObject, int[] yObject, int i,JLabel[] label,Image[] Img){
 
         this.xObject = xObject;
         this.yObject = yObject;
         this.i = i;
-
+        this.label = label;
+        this.label = label;
+        this.Img = Img;
 
     }
 
@@ -148,7 +155,7 @@ class TheThreadRun extends Thread{
     public void run() {
 
         Random random = new Random();
-        int sleep = random.nextInt(500);//สุ่ม เวลาการขยับช้าหรือเร็ว
+        int sleep = random.nextInt(500);
 
         while (true) {
             
@@ -161,32 +168,57 @@ class TheThreadRun extends Thread{
                 if (xObject[i] >= 900-50||yObject[i] >= 500-50) {
                     
                     sleep = random.nextInt(500);
-                    xMove = random.nextInt(10);
-                    yMove = random.nextInt(10);
-                    xMove *= -1;
-                    yMove *= -1;
+                    reverseDirection();
                 
                 }
 
                 if (xObject[i] <= 0||yObject[i] <= 0) {
                     
                     sleep = random.nextInt(500);
-                    xMove = random.nextInt(10);
-                    yMove = random.nextInt(10);
-                    xMove *= 1;
-                    yMove *= 1;
+                    reverseDirectionZERO();
+                }
+
+                 // ตรวจสอบการชนกันระหว่างวัตถุ
+                 for (int j = 0; j < xObject.length; j++) {
+                    if (i != j && checkCollision(xObject[i], yObject[i], xObject[j], yObject[j])) {
+                        reverseDirection();
+                    }
                 }
                 xObject[i] += xMove;
                 yObject[i] += yMove;
+
 
             } catch (Exception e) {
                 // TODO: handle exception
             }
             
-
-
         }
     }
+
+    //เมื่อตำแหน่ง X Y มากกว่า Frame การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น ลบ
+    public void reverseDirection() {
+        Random random = new Random();
+        xMove = random.nextInt(10);
+        yMove = random.nextInt(10);
+        xMove *= -1;
+        yMove *= -1;
+    }
+
+    //เมื่อตำแหน่ง X Y เท่ากับ 0 การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น บวก
+    public void reverseDirectionZERO(){
+        Random random = new Random();
+        xMove = random.nextInt(10);
+        yMove = random.nextInt(10);
+        xMove *= 1;
+        yMove *= 1;
+    }
+
+    // ตรวจสอบการชนกันของวัตถุ
+    public boolean checkCollision(int x1, int y1, int x2, int y2) {
+        int size = 100;
+        return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
+    }
+
 
 }
 
