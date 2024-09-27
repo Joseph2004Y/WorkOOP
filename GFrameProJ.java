@@ -119,7 +119,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
     // แสดงอุกาบาต   
     for (int i = 0; i < ShowObject.length; i++) {
 
-    g.drawImage(Img[i], xObject[i], yObject[i], 100, 100, this); // วาดภาพอุกาบาต
+    g.drawImage(Img[i], xObject[i], yObject[i], 50, 50, this); // วาดภาพอุกาบาต
 
     for (int j = 0; j < xObject.length; j++) {
         if (i != j) {
@@ -136,7 +136,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
     }
 
     public boolean checkCollision(int x1, int y1, int x2, int y2) {
-        int size = 100;
+        int size = 50;
         return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
     }
     
