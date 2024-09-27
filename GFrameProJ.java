@@ -84,7 +84,7 @@ class PanelProJ extends JPanel implements MouseMotionListener{
                 xObject[i] = (int)(Math.random()*900);//สุ่มตำแหน่ง x
                 yObject[i] = (int)(Math.random()*500);//สุ่มตำแหน่ง y
                 ShowObject[i] = true;
-                Run[i] = new TheThreadRun(xObject, yObject, i, label,Img);
+                Run[i] = new TheThreadRun(xObject, yObject, i, label[i]);
                 Run[i].start();
 
             }
@@ -134,20 +134,17 @@ class TheThreadRun extends Thread{
 
     int[] xObject;
     int[] yObject;
-    JLabel[] label;
-    Image[] Img;
+    JLabel label;
     int i;
     int xMove = 5;
     int yMove = 5;  
 
-    TheThreadRun(int[] xObject, int[] yObject, int i,JLabel[] label,Image[] Img){
+    TheThreadRun(int[] xObject, int[] yObject, int i,JLabel label){
 
         this.xObject = xObject;
         this.yObject = yObject;
         this.i = i;
         this.label = label;
-        this.label = label;
-        this.Img = Img;
 
     }
 
@@ -177,13 +174,7 @@ class TheThreadRun extends Thread{
                     sleep = random.nextInt(500);
                     reverseDirectionZERO();
                 }
-
-                 // ตรวจสอบการชนกันระหว่างวัตถุ
-                 for (int j = 0; j < xObject.length; j++) {
-                    if (i != j && checkCollision(xObject[i], yObject[i], xObject[j], yObject[j])) {
-                        reverseDirection();
-                    }
-                }
+                
                 xObject[i] += xMove;
                 yObject[i] += yMove;
 
@@ -211,12 +202,6 @@ class TheThreadRun extends Thread{
         yMove = random.nextInt(10);
         xMove *= 1;
         yMove *= 1;
-    }
-
-    // ตรวจสอบการชนกันของวัตถุ
-    public boolean checkCollision(int x1, int y1, int x2, int y2) {
-        int size = 100;
-        return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
     }
 
 
