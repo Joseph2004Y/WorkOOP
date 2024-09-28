@@ -1,243 +1,139 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.io.File;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import javax.swing.*;
-//test git hub
+import javax.swing.Timer;
+
 public class GFrameProJ extends JFrame {
-
-public GFrameProJ(){
-
-    setSize(950, 600);
-    setDefaultCloseOperation(EXIT_ON_CLOSE);
-    setLocationRelativeTo(null);
-
-}
-public static void main(String[] args) {
     
-    GFrameProJ frame = new GFrameProJ();
-    PanelProJ Mypanel = new PanelProJ();
-    
-    Mypanel.addMouseMotionListener(Mypanel);
-    frame.add(Mypanel);
-    frame.setVisible(true);
-
-}
-
-}
-
-//================================================================================
-
-
-class PanelProJ extends JPanel implements MouseMotionListener{
-
-
-    //ข้อมูลตำแหน่งของอุกาบาต
-    int []xObject ;
-    int []yObject ;
-    //แสดงอุกาบาตนั้นๆ หากเป็น true
-    boolean []ShowObject ; 
-    //เก็บอุกาบาตที่สสุ่มได้
-    Image[] Img;
-    TheThreadRun []Run;
-    //ยิง
-    boolean Shot = false;
-
-    int xFrame=0;
-    int yFrame=0;
-    
-
-
-    Image backgrou =  Toolkit.getDefaultToolkit().createImage(
-        System.getProperty("user.dir") + File.separator + "imgProject\\world.jpg"
-    );
-
-
-    public PanelProJ(){
-
-        setSize(950, 600);
+    //-------------------------------Set up Main Frame Start--------------------------------------------------
+    public GFrameProJ() {
+        setSize(1200, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setLayout(null);
 
-        //กำหนดจำนวนอุกาบาต
-        try (Scanner input = new Scanner(System.in)) {
-            System.out.print("Enter number of objects :");int Object = input.nextInt();
+        Panel4Paint panel4Paint = new Panel4Paint();
+        add(panel4Paint);
+        setVisible(true);
+    }
+    //------------------------------Set up Main Frame End-------------------------------------------------
 
-            xObject = new int[Object];
-            yObject = new int[Object];
-            ShowObject = new boolean[Object];
-            Img = new Image[Object];
-            Run = new TheThreadRun[Object];
 
-            //จัดการข้อมูล และสุ่มตำแหน่งอุกาบาต
-            for(int i=0;i<Object;i++){
+    //--------------------------------Main method 4 Run Start-------------------------------------------------------- 
+    public static void main(String[] args) {
+        GFrameProJ gf = new GFrameProJ();
+    }
+}
+    //--------------------------------Main method 4 Run End-------------------------------------------------------- 
 
-                int randInt =  (int)(Math.random()*10)+1;
-                String randOf = String.valueOf(randInt); 
-                Img[i] =   Toolkit.getDefaultToolkit().createImage(
-                    System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + randOf +".png"
-                );
 
-                boolean positionFound = false;
 
-            while (!positionFound) {
-            // สุ่มตำแหน่ง x และ y
-            xObject[i] = (int)(Math.random() * 900); // สุ่มตำแหน่ง x
-            yObject[i] = (int)(Math.random() * 500); // สุ่มตำแหน่ง y
 
-            positionFound = true; // เริ่มต้นว่าพบตำแหน่งแล้ว
-            
-            for (int j = 0; j < i; j++) {// ตรวจสอบตำแหน่งที่สุ่มได้กับตำแหน่งที่สุ่มไปก่อนหน้านี้
-                // ถ้าตำแหน่งซ้ำ
-                if (xObject[i] < xObject[j] + 100 && xObject[i] + 100 > xObject[j] &&
-                    yObject[i] < yObject[j] + 100 && yObject[i] + 100 > yObject[j]) {
-                    positionFound = false; // ไม่พบตำแหน่งที่ไม่ซ้ำ
-                    break; 
+
+
+
+    //----------------------------------Panel 4 Pain :D Start-----------------------------------------------------
+class Panel4Paint extends JPanel {
+    //////////////Attribute/////////////////////
+    private ArrayList<Meteor> meteorsArL;
+    Random ran = new Random();
+    int numOfImg = 0;
+
+    
+    Image BGI = Toolkit.getDefaultToolkit().createImage(
+        System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + "world.jpg");
+
+    //////////////Attribute/////////////////////
+
+
+
+    public Panel4Paint() {
+
+        setSize(1200, 700);//set up Panel
+        setLayout(null);
+
+        meteorsArL = new ArrayList<>();//Local Variable
+        Scanner input = new Scanner(System.in);
+
+
+
+        try {
+            System.out.print("Enter number of Meteors: ");
+            numOfImg = input.nextInt();
+
+            for (int i = 0; i < numOfImg; i++) {
+                meteorsArL.add(new Meteor(ran.nextInt(1000), ran.nextInt(500), //create Meteor
+                    ran.nextInt(5) - 2, ran.nextInt(5) - 2, ran.nextInt(10) + 1));
+            }
+
+
+            //Timer 4 check movement Meteor
+            Timer timer = new Timer(100, new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    for (Meteor MTO : meteorsArL) {
+                        MTO.meteorMove(getWidth(), getHeight(), meteorsArL);
+                    }
+                    repaint();
                 }
-            }
-        }
+            });
+            timer.start();
 
-    ShowObject[i] = true;
-    Run[i] = new TheThreadRun(xObject, yObject, i);
-    Run[i].start();
-            }
-        }catch (Exception e) {
-            System.out.println("กรุณาใส่ข้อมูลเป็นตัวเลขเพื่อกำหนดจำนวน!!!!!!");
+        } catch (InputMismatchException ex) {
+            System.out.println("Error: " + ex.getMessage());
         }
-        
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-
-        //ภาพพื้นหลัง
-        g.drawImage(backgrou, 0, 0, getWidth(), getHeight(),this);
+        super.paintComponent(g);
         
+        g.drawImage(BGI, 0, 0, getWidth(), getHeight(), this);
 
-    // แสดงอุกาบาต   
-    for (int i = 0; i < ShowObject.length; i++) {
-
-    g.drawImage(Img[i], xObject[i], yObject[i], 100, 100, this); // วาดภาพอุกาบาต
-
-    for (int j = 0; j < xObject.length; j++) {
-        if (i != j) {
-            // ตรวจสอบการชนกันระหว่างวัตถุ i และ j
-            if (checkCollision(xObject[i], yObject[i], xObject[j], yObject[j])) {
-                Run[i].reverseDirection();
-                Run[j].reverseDirectionZERO();
-                }
+        
+        for (Meteor MTO : meteorsArL) {
+            if(MTO.getisDestroy()){
+                g.drawImage(MTO.getDestroyImg(), MTO.getXMeto(), MTO.getYMeto(), 100, 100, this);//Change meteor to bomb
+            } else {
+                g.drawImage(MTO.getMTOImage(), MTO.getXMeto(), MTO.getYMeto(), 100, 100, this);//drawn Meteor
             }
         }
-    }
-        repaint();
 
-    }
-
-    public boolean checkCollision(int x1, int y1, int x2, int y2) {
-        int size = 100;
-        return (x1 < x2 + size && x1 + size > x2 && y1 < y2 + size && y1 + size > y2);
-    }
-    
-//======================================================================================
-
-    @Override
-    public void mouseDragged(MouseEvent e) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'mouseDragged'");
-    }
-
-    @Override
-    public void mouseMoved(MouseEvent e) {
-       
-        Shot = false; //ยับเมารืจะไม่เกิดการยิง
-
-        xFrame = e.getX();
-        yFrame = e.getY();
-
-        System.out.println("X :" + xFrame + "\tY :" + yFrame);//แสดงตำแหน่ง x y ทุกคร้งที่ขยับเม้า
-        repaint();
-    }
-
-}
-
-class TheThreadRun extends Thread{
-
-    int[] xObject;
-    int[] yObject;
-    int i;
-    int xMove = 5;
-    int yMove = 5;  
-    int sleep = 0;
-
-    TheThreadRun(int[] xObject, int[] yObject, int i){
-
-        this.xObject = xObject;
-        this.yObject = yObject;
-        this.i = i;
-
-
-    }
-
-    @Override
-    public void run() {
-
-        Random random = new Random();
-        sleep = random.nextInt(1000);
-
-        while (true) {
-            
-            try {
-            
-                Thread.sleep(sleep);
-
-                if (xObject[i] >= 900-50||yObject[i] >= 500-50) {
-                    
-                    sleep = random.nextInt(1000);
-                    reverseDirection();
+        //Check mouse clicked 2 time
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    for (Meteor MTO : meteorsArL) {
+                        if (MTO.isCollidingWithMouse(e.getX(), e.getY())) {
+                            MTO.setisDestroy(); 
+                        
+                            repaint();
+                                
                 
+                            //set alarm bomb 2 second after double clicked Meteor
+                            Timer alarm = new Timer(1000, new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    meteorsArL.remove(MTO);//delete Meteor from ArrayList
+
+                                    repaint();
+                                        
+                                }
+                            });
+                            alarm.setRepeats(false);//set Timer work 1 time **repeat = ทำซ้ำ**
+                            alarm.start();
+                            break;
+                        }
+                    }
                 }
-
-                if (xObject[i] <= 0||yObject[i] <= 0) {
-                    
-                    sleep = random.nextInt(1000);
-                    reverseDirectionZERO();
-                }
-                
-                
-                xObject[i] += xMove;
-                yObject[i] += yMove;
-
-
-            } catch (Exception e) {
-                // TODO: handle exception
             }
-            
-        }
+        });
     }
-
-    //เมื่อตำแหน่ง X Y มากกว่า Frame การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น ลบ
-    public void reverseDirection() {
-        Random random = new Random();
-        sleep = random.nextInt(1000);
-        xMove = random.nextInt(10);
-        yMove = random.nextInt(10);
-        xMove *= -1;
-        yMove *= -1;
-    }
-
-    //เมื่อตำแหน่ง X Y เท่ากับ 0 การเปลีี่ยนแปลงตำแหน่งจะกลายเป็น บวก
-    public void reverseDirectionZERO(){
-        Random random = new Random();
-        sleep = random.nextInt(1000);
-        xMove = random.nextInt(10);
-        yMove = random.nextInt(10);
-        xMove *= 1;
-        yMove *= 1;
-    }
-
-
 }
-
-
+    //----------------------------------Panel 4 Pain :D End-----------------------------------------------------
