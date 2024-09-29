@@ -22,29 +22,29 @@ public class GFrameProJ extends JFrame {
         setVisible(true);  
     }
     public static void main(String[] args) {
-        GFrameProJ gf = new GFrameProJ();  
+        GFrameProJ display = new GFrameProJ();  
     }
 }
 //===========================================================================================================================================
 
 class Panel4Paint extends JPanel {
 
-        private ArrayList<Meteor> meteorsArL;  // เก็บข้อมูลอุกกาบาตทั้งหมดในรูปแบบ ArrayList
-        private Random ran = new Random();  // สร้างออบเจ็กต์สุ่มค่าต่างๆ
-        private int numOfImg = 0;  // จำนวนอุกกาบาต
-        private Image BGI;  // รูปภาพพื้นหลัง
+        private ArrayList<Meteor> meteorsArL;  
+        private Random ran = new Random();  
+        private int numOfImg = 0;  
+        private Image BGI;  
     
-        // คอนสตรัคเตอร์สำหรับแผงวาดภาพ
+        
         public Panel4Paint() {
 
-        setSize(1200, 700);  // กำหนดขนาดแผง
+        setSize(1200, 700);  
         setLayout(null);
     
             BGI = Toolkit.getDefaultToolkit().createImage(
                 System.getProperty("user.dir") + File.separator + "imgProject" + File.separator + "world.jpg");
     
-            meteorsArL = new ArrayList<>();  // สร้าง ArrayList สำหรับเก็บอุกกาบาต
-            Scanner input = new Scanner(System.in);  // รับข้อมูลจากผู้ใช้ผ่านคอนโซล
+            meteorsArL = new ArrayList<>();  
+            Scanner input = new Scanner(System.in);  
     
             try {
 
@@ -54,10 +54,10 @@ class Panel4Paint extends JPanel {
                 for (int i = 0; i < numOfImg; i++) {
         
                     Meteor meteor = new Meteor(ran.nextInt(1000), ran.nextInt(500),
-                        ran.nextInt(5) - 2, ran.nextInt(5) - 2, ran.nextInt(10) + 1, this);
-                    meteorsArL.add(meteor);  // เพิ่มอุกกาบาตเข้าใน ArrayList
+                        ran.nextInt(30) - 5, ran.nextInt(30) - 5, ran.nextInt(10) + 1, this);
+                    meteorsArL.add(meteor);  
     
-                    // สร้าง thread สำหรับอุกกาบาตแต่ละตัว
+                    
                     Thread meteorThread = new Thread(meteor);
                     meteorThread.start(); 
                 }
@@ -71,34 +71,28 @@ class Panel4Paint extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-
             g.drawImage(BGI, 0, 0, getWidth(), getHeight(), this); 
     
             // วาดอุกกาบาตทั้งหมดใน
-            for (Meteor MTO : meteorsArL) {
-                if (MTO.getisDestroy()) {
-
-                    // ให้BOOM
-                    g.drawImage(MTO.getDestroyImg(), MTO.getXMeto(), MTO.getYMeto(), 100, 100, this);
-
+            for (Meteor MTO : meteorsArL){
+                if (MTO.checkMeteorBoom()){
+                    g.drawImage(MTO.getBombImage(), MTO.getXMeteor(), MTO.getYMeteor(), 100, 100, this);
                 } 
                 else {
-
-                    // หากอุกกาบาตยังไม่ถูกทำลาย ให้แสดงภาพอุกกาบาต
-                    g.drawImage(MTO.getMTOImage(), MTO.getXMeto(), MTO.getYMeto(), 100, 100, this);
+                    g.drawImage(MTO.getMeteorImage(), MTO.getXMeteor(), MTO.getYMeteor(), 100, 100, this);
 
                 }
             }
     
 
            
-            addMouseListener(new MouseAdapter() { // ตรวจจับการคลิกเมาส์
+            addMouseListener(new MouseAdapter() { 
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    if (e.getClickCount() == 2) {  // ตรวจสอบว่าคลิกสองครั้ง
+                    if (e.getClickCount() == 2) {  
                         for (Meteor MTO : meteorsArL) {
-                            if (MTO.isCollidingWithMouse(e.getX(), e.getY())) {  // ตรวจสอบว่าเมาส์ชนกับอุกกาบาตหรือไม่
-                                MTO.setisDestroy();  
+                            if (MTO.checkMouseDoubleClickInAreaMTO(e.getX(), e.getY())) {  
+                                MTO.setBombBoom();  
                                 repaint();  
     
                                 // ลบอุกกาบาตออกจากหน้าจอ
@@ -106,7 +100,7 @@ class Panel4Paint extends JPanel {
 
                                     @Override
                                     public void actionPerformed(ActionEvent e) {
-                                        MTO.stopRunning();  
+                                        MTO.stopRunning(); 
                                         meteorsArL.remove(MTO); 
                                         repaint(); 
                                     }
@@ -114,7 +108,7 @@ class Panel4Paint extends JPanel {
                                 });
                                 alarm.setRepeats(false); 
                                 alarm.start(); 
-                                break;
+                                
                             }
                         }
                     }

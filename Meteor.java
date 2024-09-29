@@ -9,14 +9,15 @@ public class Meteor extends Thread {
     public int xStart, yStart;
     public int MTOspeedX, MTOspeedY;
     public int numOfImgMTO;
-    private boolean isDestroy = false;
+    private boolean isBombBoom = false;
     private int sizeOfMeteor = 100;
-    private boolean running = true; // To control thread
-    Random random = new Random();
+    private boolean running = true; 
+    private Panel4Paint panel; 
 
+    Random random = new Random();
     Image imgMTO;
-    Image DestroyMeteor;
-    private Panel4Paint panel; // Reference to panel for repainting
+    Image boomMeteor;
+    
 
     //Constructor 
     public Meteor(int x, int y, int spdX, int spdY, int numImgMTO, Panel4Paint panel) {
@@ -25,13 +26,13 @@ public class Meteor extends Thread {
         this.MTOspeedX = spdX;
         this.MTOspeedY = spdY;
         this.numOfImgMTO = numImgMTO;
-        this.panel = panel; // Save panel reference to call repaint
+        this.panel = panel;
 
 
         imgMTO = new ImageIcon(System.getProperty("user.dir") + File.separator + 
             "imgProject" + File.separator + numOfImgMTO + ".png").getImage();
 
-        DestroyMeteor = new ImageIcon(System.getProperty("user.dir") + File.separator + 
+        boomMeteor = new ImageIcon(System.getProperty("user.dir") + File.separator + 
             "imgProject" + File.separator + "bomb.gif").getImage();
     }
 
@@ -45,8 +46,7 @@ public class Meteor extends Thread {
             panel.repaint();
 
             try {
-                int sleep = random.nextInt(50); //ช้าเร็วของอุกาบาต
-                Thread.sleep(sleep); 
+                Thread.sleep(144); 
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -62,34 +62,35 @@ public class Meteor extends Thread {
     public void meteorMove(int width, int height, ArrayList<Meteor> meteors) {
         if (xStart <= 0 || xStart >= width - getSizeOfMeteor()) {
             MTOspeedX = -MTOspeedX;
-            adjustSpeed();
+            changeSpeedMeteor();
             xStart = Math.max(0, Math.min(xStart, width - getSizeOfMeteor()));
         }
 
         if (yStart <= 0 || yStart >= height - getSizeOfMeteor()) {
             MTOspeedY = -MTOspeedY;
-            adjustSpeed();
+            changeSpeedMeteor();
             yStart = Math.max(0, Math.min(yStart, height - getSizeOfMeteor()));
         }
 
         for (Meteor MTO : meteors) {
-            if (MTO != this && isColliding(MTO)) {
-                resolveCollision(MTO);
+            if (MTO != this && checkCollideMeteor(MTO)) {
+                changePositionAfterCollide(MTO);;
             }
         }
 
         xStart += MTOspeedX;
         yStart += MTOspeedY;
+
         xStart = Math.max(0, Math.min(xStart, width - getSizeOfMeteor()));
         yStart = Math.max(0, Math.min(yStart, height - getSizeOfMeteor()));
     }
 
-    public boolean isColliding(Meteor MTO) {
+    public boolean checkCollideMeteor(Meteor MTO) {
         int distance = (int) Math.sqrt(Math.pow(xStart - MTO.xStart, 2) + Math.pow(yStart - MTO.yStart, 2));
         return distance < getSizeOfMeteor();
     }
 
-    public void resolveCollision(Meteor MTO) {
+    public void changePositionAfterCollide(Meteor MTO) {
         int overlap = getSizeOfMeteor() - (int) Math.sqrt(Math.pow(xStart - MTO.xStart, 2) + Math.pow(yStart - MTO.yStart, 2));
 
         int dx = xStart - MTO.xStart;
@@ -111,7 +112,7 @@ public class Meteor extends Thread {
         MTO.MTOspeedY = -MTO.MTOspeedY;
     }
 
-    public void adjustSpeed() {
+    public void changeSpeedMeteor(){
         do {
             MTOspeedX = random.nextInt(30) - 5;
         } while (MTOspeedX == 0);
@@ -121,36 +122,38 @@ public class Meteor extends Thread {
         } while (MTOspeedY == 0);
     }
 
-    public boolean isCollidingWithMouse(int mouseX, int mouseY) {
+    public boolean checkMouseDoubleClickInAreaMTO(int mouseX, int mouseY) {
         return (mouseX >= xStart && mouseX <= xStart + 100 && 
                 mouseY >= yStart && mouseY <= yStart + 100);
     }
 
-    public int getXMeto() {
+    public int getXMeteor() {
         return xStart;
     }
 
-    public int getYMeto() {
+    public int getYMeteor() {
         return yStart;
     }
 
-    public Image getMTOImage() {
+
+
+    public Image getMeteorImage() {
         return imgMTO;
     }
 
-    public Image getDestroyImg() {
-        return DestroyMeteor;
+    public Image getBombImage() {
+        return boomMeteor;
     }
 
-    public boolean getisDestroy() {
-        return isDestroy;
+    public boolean checkMeteorBoom() {
+        return isBombBoom;
     }
 
     public int getSizeOfMeteor() {
         return sizeOfMeteor;
     }
 
-    public void setisDestroy() {
-        isDestroy = true;
+    public void setBombBoom() {
+        isBombBoom = true;
     }
 }
